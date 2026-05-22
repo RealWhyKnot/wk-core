@@ -1,0 +1,70 @@
+name: Bug report
+description: Something is broken in wk-core.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `wk-core` is a shared dependency of [vrc-avatar-qol](https://github.com/RealWhyKnot/vrc-avatar-qol) and [vrcfury-qol](https://github.com/RealWhyKnot/vrcfury-qol). If the bug is in a tool window or inspector overlay, file the issue against that repo instead. File here only when the bug is clearly in shared code (styles, path/mesh helpers, hot-reload, UIElements walkers, prefixed logger).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. What did you do, what did you expect, what happened instead?
+      placeholder: |
+        Steps to reproduce:
+        1. ...
+        2. ...
+        Expected: ...
+        Actual: ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which subsystem is affected?
+      multiple: true
+      options:
+        - Styling (WkStyles, palette, NoticeKind)
+        - Path / mesh / avatar utilities
+        - HumanoidSideMap
+        - Hot reload (EditorHotReload) / compile log
+        - UIElements walkers (EditorElementWalker)
+        - EditorLogger
+        - Other (describe below)
+    validations:
+      required: true
+
+  - type: input
+    id: unity-version
+    attributes:
+      label: Unity version
+      placeholder: e.g. 2022.3.22f1
+    validations:
+      required: true
+
+  - type: input
+    id: wkcore-version
+    attributes:
+      label: wk-core version
+      description: Visible in the package's `package.json` or in VCC's installed-packages list.
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Unity console output
+      description: |
+        Copy any errors/exceptions from the Unity console. The hot-reload tool also writes a log at `<ProjectRoot>/Logs/WkCore.log` -- paste relevant lines.
+      render: text
+
+  - type: textarea
+    id: extra-context
+    attributes:
+      label: Anything else?
+      description: Screenshots, scene/prefab snippets, hardware notes -- anything that helps reproduce.

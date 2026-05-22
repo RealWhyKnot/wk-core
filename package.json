@@ -1,0 +1,22 @@
+{
+  "name": "dev.whyknot.core",
+  "displayName": "WK Core",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "Shared Editor-only utilities for the WhyKnot VRChat tools: IMGUI styling primitives, hot-reload watcher, path/mesh/avatar helpers, UIElements walkers, prefixed logger. Installed automatically as a dependency of dev.whyknot.avatar-qol and dev.whyknot.vrcfury-qol.",
+  "author": {
+    "name": "WhyKnot",
+    "url": "https://whyknot.dev"
+  },
+  "license": "GPL-3.0-or-later",
+  "url": "https://github.com/RealWhyKnot/wk-core/releases/download/v1.0.0/dev.whyknot.core-1.0.0.zip",
+  "documentationUrl": "https://github.com/RealWhyKnot/wk-core",
+  "changelogUrl": "https://github.com/RealWhyKnot/wk-core/blob/main/CHANGELOG.md",
+  "vpmDependencies": {},
+  "keywords": [
+    "vrchat",
+    "editor-tools",
+    "shared",
+    "utilities"
+  ]
+}

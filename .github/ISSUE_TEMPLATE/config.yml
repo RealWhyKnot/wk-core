@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: vrc-avatar-qol issues
+    url: https://github.com/RealWhyKnot/vrc-avatar-qol/issues
+    about: For bugs in Avatar QoL tools (Weight Sanity Check, PhysBone Presets, Bone Merger, etc.), file in that repo.
+  - name: vrcfury-qol issues
+    url: https://github.com/RealWhyKnot/vrcfury-qol/issues
+    about: For bugs in VRCFury QoL tools (inspector overlay, Move components, Replace References, etc.), file in that repo.

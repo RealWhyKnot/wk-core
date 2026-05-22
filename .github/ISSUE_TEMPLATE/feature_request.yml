@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a helper, primitive, or utility to add to wk-core.
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `wk-core` exists to host helpers that two or more WhyKnot packages share. New surface should usually have a concrete second caller in mind, not just a "this might be useful" hunch.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: What duplication or friction in the downstream packages would this remove?
+      placeholder: e.g. "Both vrcfury-qol and vrc-avatar-qol implement the same X; centralising would let me fix Y once."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: A clear description of the helper / primitive. Method signature, expected behavior, edge cases.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you tried, or reasons you ruled out leaving the duplication in place.
+
+  - type: textarea
+    id: extra-context
+    attributes:
+      label: Additional context
+      description: Links to existing call sites, similar APIs in other packages, anything that helps.
