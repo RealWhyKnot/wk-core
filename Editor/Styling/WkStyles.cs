@@ -5,14 +5,24 @@
 // each call site; this file centralises the palette, typography, and a
 // small set of widget primitives so every screen looks like the same app.
 //
-// Lazy initialisation matters here: EditorStyles is null when assemblies
+// Theming. Colors come from WkTheme. The default theme is WkTheme.WhyKnot
+// (the brand palette: black / gray / light blue). Downstream tools that
+// live inside someone else's chrome -- the VRCFury inspector overlay,
+// for instance -- wrap their OnGUI body in
+//     using (WkStyles.Scope(WkTheme.VRCFury)) { ... }
+// to push a different palette for the duration of that scope. Scopes
+// nest. Without an explicit scope every WkStyles call resolves through
+// WkTheme.WhyKnot.
+//
+// Lazy GUIStyle initialisation. EditorStyles is null when assemblies
 // first load, so static initialisers that touch it throw and the type
-// becomes permanently broken. Every GUIStyle is a property with a backing
-// field that's built on first access from inside an OnGUI call. Backing
-// fields go null after a domain reload -- the lazy pattern handles that
-// automatically without any extra plumbing in window code.
+// becomes permanently broken. Every GUIStyle is a property with a
+// backing field that's built on first access from inside an OnGUI call.
+// Backing fields go null after a domain reload -- the lazy pattern
+// handles that automatically without any extra plumbing in window code.
 
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,40 +32,73 @@ namespace WhyKnot.Core.Styling {
 
     public static class WkStyles {
 
-        // ---- Palette ------------------------------------------------------
-        // Theme-aware getters; Unity flips EditorGUIUtility.isProSkin at
-        // runtime when the user changes the editor theme, so resolve on
-        // each access.
+        // ---- Theming ------------------------------------------------------
+
+        private static readonly Stack<WkTheme> _themeStack = new Stack<WkTheme>();
+
+        /// <summary>Theme used when no scope is active. Set this in each consumer's [InitializeOnLoad] if you want a different default; otherwise WkTheme.WhyKnot applies.</summary>
+        public static WkTheme DefaultTheme { get; set; } = WkTheme.WhyKnot;
+
+        /// <summary>The theme currently in effect. Resolves to the top of the scope stack, or DefaultTheme if no scope is active.</summary>
+        public static WkTheme CurrentTheme =>
+            _themeStack.Count > 0 ? _themeStack.Peek() : DefaultTheme;
+
+        /// <summary>The variant of the current theme matching the user's Pro/Personal skin choice.</summary>
+        public static WkTheme.Variant Current => CurrentTheme.Current;
+
+        /// <summary>
+        /// Push <paramref name="theme"/> onto the theme stack for the duration
+        /// of a `using` block. Idiomatic usage:
+        ///     using (WkStyles.Scope(WkTheme.VRCFury)) {
+        ///         WkStyles.Notice(NoticeKind.Info, "...");
+        ///     }
+        /// Passing null leaves the stack alone.
+        /// </summary>
+        public static IDisposable Scope(WkTheme theme) {
+            if (theme == null) return NoopScope.Instance;
+            _themeStack.Push(theme);
+            return new ThemeScope();
+        }
+
+        private sealed class ThemeScope : IDisposable {
+            public void Dispose() {
+                if (_themeStack.Count > 0) _themeStack.Pop();
+            }
+        }
+
+        private sealed class NoopScope : IDisposable {
+            public static readonly NoopScope Instance = new NoopScope();
+            public void Dispose() { }
+        }
+
+        // ---- Palette (resolves through the active theme) ------------------
 
         /// <summary>Brand accent -- primary buttons, suggested-card border, suggestion bar fill.</summary>
-        public static Color ColorAccent =>
-            EditorGUIUtility.isProSkin
-                ? new Color(0.20f, 0.45f, 0.85f, 1f)
-                : new Color(0.27f, 0.55f, 0.95f, 1f);
+        public static Color ColorAccent  => Current.Accent;
 
         /// <summary>Warning notices, banner backgrounds.</summary>
-        public static Color ColorWarning =>
-            EditorGUIUtility.isProSkin
-                ? new Color(0.78f, 0.54f, 0.18f, 1f)
-                : new Color(0.85f, 0.62f, 0.20f, 1f);
+        public static Color ColorWarning => Current.Warning;
 
         /// <summary>Success notices ("scan clean").</summary>
-        public static Color ColorSuccess =>
-            EditorGUIUtility.isProSkin
-                ? new Color(0.25f, 0.64f, 0.30f, 1f)
-                : new Color(0.30f, 0.70f, 0.35f, 1f);
+        public static Color ColorSuccess => Current.Success;
 
         /// <summary>Info notices, neutral pills.</summary>
-        public static Color ColorInfo =>
-            EditorGUIUtility.isProSkin
-                ? new Color(0.50f, 0.55f, 0.65f, 1f)
-                : new Color(0.45f, 0.50f, 0.60f, 1f);
+        public static Color ColorInfo    => Current.Info;
 
-        /// <summary>Hairline divider tint with alpha baked in. Theme-flipped.</summary>
-        public static Color ColorDivider =>
-            EditorGUIUtility.isProSkin
-                ? new Color(1f, 1f, 1f, 0.10f)
-                : new Color(0f, 0f, 0f, 0.18f);
+        /// <summary>Destructive action signal (red button background, "Stop Previewing", etc).</summary>
+        public static Color ColorDanger  => Current.Danger;
+
+        /// <summary>Hairline divider tint with alpha baked in.</summary>
+        public static Color ColorDivider => Current.Divider;
+
+        /// <summary>Surface color for banners and panels.</summary>
+        public static Color ColorBackground    => Current.Background;
+        public static Color ColorBackgroundAlt => Current.BackgroundAlt;
+
+        /// <summary>Default label color.</summary>
+        public static Color ColorTextPrimary => Current.TextPrimary;
+        public static Color ColorTextMuted   => Current.TextMuted;
+        public static Color ColorBorder      => Current.Border;
 
         // ---- Typography ---------------------------------------------------
         // Each style is built from a baseline EditorStyles entry to inherit

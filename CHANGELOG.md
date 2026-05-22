@@ -11,6 +11,23 @@ All notable changes to this project will be documented in this file. Format foll
 
 ---
 
+## [1.1.0](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.0) -- 2026-05-22
+
+### Added
+- `WhyKnot.Core.Styling.WkTheme` carries the palette + chrome that `WkStyles` emits. Each theme has Pro and Personal `Variant`s for the two editor skins. Two presets ship: `WkTheme.WhyKnot` (black / gray / light blue -- the brand palette) and `WkTheme.VRCFury` (matches VRCFury's existing dark-gray row chrome and warm accents). Custom themes can be built by populating the same Variant fields.
+- `WkStyles.Scope(WkTheme)` pushes a theme onto a stack for the lifetime of a `using` block; nested scopes restore the outer theme on dispose. `WkStyles.CurrentTheme` resolves to the top of the stack, or `WkStyles.DefaultTheme` (initially `WkTheme.WhyKnot`) when nothing is active. The whole `WkStyles` palette -- `ColorAccent`, `ColorWarning`, `ColorSuccess`, `ColorInfo`, `ColorDanger`, `ColorDivider`, `ColorBackground`, `ColorTextPrimary`, `ColorTextMuted`, `ColorBorder` -- now resolves through the active theme.
+- `WhyKnot.Core.Logging.WkLogger` -- per-package file logger. Each WhyKnot package builds one in its `[InitializeOnLoad]` static constructor and the logger self-registers with `WkLoggerRegistry`. Output goes to `%LocalAppData%/WhyKnot/Logs/<package-id>/session-<timestamp>.log` (machine-wide, project-independent, so the user has one place to look regardless of which Unity project the issue surfaced in). Levels: `Debug`, `Info`, `Warning`, `Error`, plus `Exception(ex, context)` that dumps the stack trace. Each line carries timestamp, level tag, calling source file:line, and method name (via `[CallerMemberName]` / `[CallerFilePath]` / `[CallerLineNumber]`). Session header logs Unity version, project path, machine/user/batch-mode. Configurable per-level Unity-console mirror; Info / Warning / Error mirror by default, Debug stays file-only.
+- Session retention: each package keeps at most 3 session log files. With three WhyKnot packages registered (`dev.whyknot.core`, `dev.whyknot.vrcfury-qol`, `dev.whyknot.avatar-qol`), that caps the total at 9 files no matter how many Unity launches the user does.
+- `WhyKnot.Core.Logging.WkCoreLogger` -- wk-core's own registered logger. `EditorHotReload` and any other diagnostic surface inside this package routes through `WkCoreLogger.Instance`.
+
+### Changed
+- `EditorHotReload` no longer writes its own `<ProjectRoot>/Logs/WkCore.log` file. All of its output -- watcher activity, refresh ticks, compile started/finished, per-assembly summaries, compile errors, reload events -- now goes through `WkCoreLogger.Instance`. Watcher chatter is logged at `Debug` (file-only); compile errors at `Error` (mirrored to the Unity Console).
+
+### Removed
+- `WhyKnot.Core.Utilities.EditorLogger` -- replaced by `WhyKnot.Core.Logging.WkLogger`, which adds file output, session retention, level tags, source-location capture, and exception handling. `EditorLogger` shipped in 1.0.0 but had no downstream callers yet, so this is a clean break.
+
+---
+
 ## [1.0.0](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.0.0) -- 2026-05-22
 
 First release. `dev.whyknot.core` is a shared Editor-only utility package consumed as a `vpmDependencies` entry by the WhyKnot VRChat tools. The surface consolidates helpers that were previously duplicated across `vrc-avatar-qol` and `vrcfury-qol`.
