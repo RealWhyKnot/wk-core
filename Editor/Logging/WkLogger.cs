@@ -95,7 +95,7 @@ namespace WhyKnot.Core.Logging {
                 // If we can't even prepare the directory we still want the
                 // registry entry so callers don't blow up; subsequent writes
                 // will be no-ops thanks to the try-catch in WriteLineToFile.
-                Debug.LogWarning($"[{_displayName}] WkLogger failed to prepare log directory '{_logDirectory}': {ex.Message}");
+                UnityEngine.Debug.LogWarning($"[{_displayName}] WkLogger failed to prepare log directory '{_logDirectory}': {ex.Message}");
             }
 
             _logFilePath = Path.Combine(_logDirectory, BuildSessionFileName(DateTime.Now));
@@ -140,7 +140,7 @@ namespace WhyKnot.Core.Logging {
             Write(WkLogLevel.Error, headline, member, file, line);
             WriteLineToFile(ex.StackTrace ?? "(no stack trace)");
             WriteLineToFile("");  // blank line separator after stack
-            if (MirrorExceptionToConsole) Debug.LogException(ex);
+            if (MirrorExceptionToConsole) UnityEngine.Debug.LogException(ex);
         }
 
         /// <summary>Write a raw line to the log file with no level/prefix. Useful for headers and separators.</summary>

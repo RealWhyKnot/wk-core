@@ -11,6 +11,13 @@ All notable changes to this project will be documented in this file. Format foll
 
 ---
 
+## [1.1.1](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.1) -- 2026-05-22
+
+### Fixed
+- `Editor/Logging/WkLogger.cs` failed to compile inside Unity with CS0119: the class declares a `Debug(...)` method (the log-level entry point), which shadows `UnityEngine.Debug` for unqualified references inside the class body. Two such bare `Debug.LogWarning(...)` / `Debug.LogException(...)` call sites were resolving against the local method instead of `UnityEngine.Debug` and rejected the wrong signatures. Both now use the fully-qualified `UnityEngine.Debug.*` form.
+
+---
+
 ## [1.1.0](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.0) -- 2026-05-22
 
 ### Added
