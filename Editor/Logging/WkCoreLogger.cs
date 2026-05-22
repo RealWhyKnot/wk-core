@@ -22,7 +22,7 @@ namespace WhyKnot.Core.Logging {
 
         public const string PackageId = "dev.whyknot.core";
         public const string DisplayName = "WK Core";
-        public const string Version = "1.1.1";
+        public const string Version = "1.1.2";
 
         public static readonly WkLogger Instance = new WkLogger(PackageId, DisplayName, Version);
 

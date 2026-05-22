@@ -13,6 +13,16 @@ The most recent release is at the top.
 
 ---
 
+## [1.1.2](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.2) -- 2026-05-22
+
+### Changed
+- **`EditorHotReload` lives in its own assembly** (`dev.whyknot.core.HotReload.Editor`) with zero references to the rest of `dev.whyknot.core.Editor`. If a future change ever breaks the main Editor assembly, the watcher keeps firing, debounced `AssetDatabase.Refresh()` keeps running, and the per-session compile-error log keeps capturing -- the iteration loop doesn't stall on a self-induced compile failure. Output moves to `%LocalAppData%/WhyKnot/Logs/dev.whyknot.core.hotreload/session-<timestamp>.log`. Same 3-session retention, separate directory from the package logs (so the total file count is 3 packages * 3 sessions + 3 HotReload sessions = 12 at most).
+
+### Fixed
+- `WkLoggerTests` couldn't reach the `internal static WkLogger.CullOldSessions(...)` helper because the test assembly is separate from the Editor assembly. Added `[assembly: InternalsVisibleTo("dev.whyknot.core.Tests.Editor")]` so the test suite compiles and the culling tests run.
+
+---
+
 ## [1.1.1](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.1) -- 2026-05-22
 
 ### Fixed
