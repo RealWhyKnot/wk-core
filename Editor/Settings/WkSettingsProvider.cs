@@ -135,8 +135,6 @@ namespace WhyKnot.Core.Settings {
                 "Install nadena.dev.ndmf to route avatar passes through NDMF's pipeline instead of the raw-SDK fallback.");
             DrawSymbol("WK_VRC_SDK_AVATARS (VRChat Avatars SDK)", IsDefined("WK_VRC_SDK_AVATARS"),
                 "VRChat Avatars SDK is what backs the raw-SDK fallback path when NDMF isn't installed.");
-            DrawSymbol("WK_AAC (AnimatorAsCode)", IsDefined("WK_AAC"),
-                "Install dev.hai-vr.animator-as-code.v1 for the AAC-backed IWkAnimatorBuilder. Falls back to the self-built builder when absent.");
         }
 
         private static void DrawSymbol(string label, bool defined, string hint) {
@@ -173,9 +171,6 @@ namespace WhyKnot.Core.Settings {
 #endif
 #if WK_VRC_SDK_AVATARS
                 case "WK_VRC_SDK_AVATARS": return true;
-#endif
-#if WK_AAC
-                case "WK_AAC": return true;
 #endif
                 default: return false;
             }

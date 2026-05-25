@@ -1,12 +1,18 @@
-// WkAacImplFallback.cs
+// WkAacImpl.cs
 //
-// Self-built IWkAnimatorBuilder used when WK_AAC is not defined. Covers
-// the subset of AAC's surface this stack actually exercises: layers,
-// parameters, constant-property clips (GameObject.SetActive,
-// component-property, blend-shape, uniform scale), single-state and
-// simple two-state transitions, and basic blend trees. Features
-// outside this subset throw NotSupportedException with a hint to
-// install AnimatorAsCode for the full surface.
+// In-house IWkAnimatorBuilder. Covers the subset of fluent animator
+// construction this stack actually exercises: layers with default
+// and non-default states, named parameters, constant-property clips
+// (GameObject active toggle, component-property, blend-shape weight,
+// uniform scale), simple two-state transitions with conditions and
+// duration / exit-time, and basic blend trees.
+//
+// We deliberately don't depend on AnimatorAsCode -- the in-house
+// builder owns its own primitive set so wk-core's downstreams have a
+// stable surface without a third-party VPM dependency to chase. If a
+// future feature needs AAC-specific primitives this fallback doesn't
+// cover, the choice is then between extending the in-house builder
+// or vendoring the relevant subset of AAC at that point.
 //
 // Asset hosting: layers / states / motions / blend trees / parameters
 // are added as sub-assets of the AnimatorController (which is itself
@@ -14,7 +20,6 @@
 // standalone AnimationClip asset into the same scope folder so it
 // shows up in the asset browser alongside the controller.
 
-#if !WK_AAC
 using System;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -23,13 +28,13 @@ using WhyKnot.Core.Pipeline;
 
 namespace WhyKnot.Core.Animator {
 
-    internal sealed class WkAacFallback : IWkAnimatorBuilder {
+    internal sealed class WkAnimatorBuilderImpl : IWkAnimatorBuilder {
 
         private readonly string _systemName;
         private readonly AnimatorController _controller;
         private readonly WkGeneratedAssetScope _scope;
 
-        public WkAacFallback(string systemName, AnimatorController controller, WkGeneratedAssetScope scope) {
+        public WkAnimatorBuilderImpl(string systemName, AnimatorController controller, WkGeneratedAssetScope scope) {
             _systemName = systemName;
             _controller = controller;
             _scope = scope;
@@ -243,4 +248,3 @@ namespace WhyKnot.Core.Animator {
         }
     }
 }
-#endif

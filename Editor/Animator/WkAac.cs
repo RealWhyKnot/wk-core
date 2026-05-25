@@ -1,14 +1,13 @@
 // WkAac.cs
 //
-// Public facade for the animator-builder. Both backends (AAC-backed
-// when WK_AAC is set, self-built otherwise) implement IWkAnimatorBuilder.
-// Callers don't know or care which path they're on, but they do hand
-// in a WkGeneratedAssetScope so the backend has a folder to write
-// clips / blend trees / sub-assets into.
+// Public facade for the animator-builder. Returns an IWkAnimatorBuilder
+// backed by the in-house implementation in WkAacImpl.cs. The name is
+// historical -- the surface mirrors AnimatorAsCode's fluent shape but
+// the actual code is wk-owned to avoid a third-party VPM dependency.
 //
-// Example usage (downstream code, no #if needed):
-//   using var scope = new WkGeneratedAssetScope(WkGeneratedAssetTier.Temporary, "dev.whyknot.avatar-qol", "Loom");
-//   var b = WkAac.For("Loom", controller, scope);
+// Example usage:
+//   using var scope = new WkGeneratedAssetScope(WkGeneratedAssetTier.Temporary, "dev.whyknot.avatar-qol", "Outfits");
+//   var b = WkAac.For("Outfits", controller, scope);
 //   b.NewLayer("Outfit/Shirt").DefaultState("Off").State("On", offClip).Build();
 //   b.Build();
 
@@ -24,11 +23,7 @@ namespace WhyKnot.Core.Animator {
         public static IWkAnimatorBuilder For(string systemName, AnimatorController controller, WkGeneratedAssetScope scope) {
             if (controller == null) throw new ArgumentNullException(nameof(controller));
             if (scope == null)      throw new ArgumentNullException(nameof(scope));
-#if WK_AAC
-            return new WkAacAdapter(systemName, controller, scope);
-#else
-            return new WkAacFallback(systemName, controller, scope);
-#endif
+            return new WkAnimatorBuilderImpl(systemName, controller, scope);
         }
 
         /// <summary>

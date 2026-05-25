@@ -25,11 +25,6 @@
             "name": "com.vrchat.avatars",
             "expression": "3.5.0",
             "define": "WK_VRC_SDK_AVATARS"
-        },
-        {
-            "name": "dev.hai-vr.animator-as-code.v1",
-            "expression": "1.0.0",
-            "define": "WK_AAC"
         }
     ],
     "noEngineReferences": false
