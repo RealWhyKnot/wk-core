@@ -117,7 +117,7 @@ $nsMap = @{
     'WhyKnot.Core.Styling'     = "$($cfg.Namespace).Styling"
     'WhyKnot.Core.Utilities'   = "$($cfg.Namespace).Utilities"
     'WhyKnot.Core.Pipeline'    = "$($cfg.Namespace).Pipeline"
-    'WhyKnot.Core.Animator'    = "$($cfg.Namespace).Animator"
+    'WhyKnot.Core.Animators'   = "$($cfg.Namespace).Animators"
     'WhyKnot.Core'             = "$($cfg.Namespace)"
 }
 

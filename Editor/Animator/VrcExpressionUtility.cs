@@ -18,7 +18,7 @@ using UnityEditor;
 using UnityEngine;
 using WhyKnot.Core.Reflection;
 
-namespace WhyKnot.Core.Animator {
+namespace WhyKnot.Core.Animators {
 
     public static class VrcExpressionUtility {
 

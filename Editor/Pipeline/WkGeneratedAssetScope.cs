@@ -63,7 +63,7 @@ namespace WhyKnot.Core.Pipeline {
         /// AssetDatabase.SaveAssets if they want it on disk now rather
         /// than on next refresh.
         /// </summary>
-        public string SaveAsset(Object asset, string name) {
+        public string SaveAsset(UnityEngine.Object asset, string name) {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
             if (string.IsNullOrEmpty(name)) name = asset.GetType().Name;
             var path = AssetDatabase.GenerateUniqueAssetPath(AssetFolder + "/" + name + ".asset");

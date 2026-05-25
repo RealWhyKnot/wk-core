@@ -15,7 +15,7 @@ using System;
 using UnityEditor.Animations;
 using UnityEngine;
 
-namespace WhyKnot.Core.Animator {
+namespace WhyKnot.Core.Animators {
 
     public interface IWkAnimatorBuilder {
         IWkLayerBuilder NewLayer(string name, float weight = 1f);

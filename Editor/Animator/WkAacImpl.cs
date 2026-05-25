@@ -26,7 +26,7 @@ using UnityEditor.Animations;
 using UnityEngine;
 using WhyKnot.Core.Pipeline;
 
-namespace WhyKnot.Core.Animator {
+namespace WhyKnot.Core.Animators {
 
     internal sealed class WkAnimatorBuilderImpl : IWkAnimatorBuilder {
 
