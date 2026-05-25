@@ -1,7 +1,11 @@
 {
     "name": "dev.whyknot.core.Editor",
     "rootNamespace": "WhyKnot.Core",
-    "references": [],
+    "references": [
+        "nadena.dev.ndmf",
+        "VRC.SDKBase.Editor.BuildPipeline",
+        "VRC.SDK3A"
+    ],
     "includePlatforms": [
         "Editor"
     ],
@@ -11,6 +15,22 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "nadena.dev.ndmf",
+            "expression": "1.5.0",
+            "define": "WK_NDMF"
+        },
+        {
+            "name": "com.vrchat.avatars",
+            "expression": "3.5.0",
+            "define": "WK_VRC_SDK_AVATARS"
+        },
+        {
+            "name": "dev.hai-vr.animator-as-code.v1",
+            "expression": "1.0.0",
+            "define": "WK_AAC"
+        }
+    ],
     "noEngineReferences": false
 }
