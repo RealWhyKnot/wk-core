@@ -5,7 +5,7 @@
 
 Shared Editor-only utilities for the WhyKnot VRChat tools. The source of truth for the helpers bundled into [vrc-avatar-qol](https://github.com/RealWhyKnot/vrc-avatar-qol) and [vrcfury-qol](https://github.com/RealWhyKnot/vrcfury-qol) via `scripts/sync-to-downstream.ps1` -- each consumer carries its own copy under `Editor/Internal/` to avoid the VCC `>=` version-floor footgun.
 
-Most users will never install this package directly. It is published to `vpm.whyknot.dev` for two reasons: as a discoverable source artefact for the bundled helpers, and to host the upcoming log-viewer and settings-provider UIs that live in this assembly only (not the bundled copies).
+This repo is not distributed via VPM. There are no GitHub releases, no `vpm.whyknot.dev` listing entry, and no `dev.whyknot.core` package for end users to install. Edits land here, then `sync-to-downstream.ps1` propagates them into each downstream's `Editor/Internal/` tree where the actual shipping happens.
 
 ## What's inside
 

@@ -3,13 +3,12 @@
   "displayName": "WK Core",
   "version": "1.2.0",
   "unity": "2022.3",
-  "description": "Shared Editor-only utilities for the WhyKnot VRChat tools: themed IMGUI styling (WhyKnot + VRCFury presets) with NDMF-ErrorReport-shaped scope logging, per-package file logger with session retention, hot-reload watcher (covers Packages/ as well as Assets/), path/mesh/blendshape/avatar/folder/undo helpers, reflection cache + GlobalObjectId helpers, EditorApplication.update ticker, typed EditorPrefs wrapper, WkToolWindow + WkInspectorEditor base classes, UIElements walkers. Bundled into dev.whyknot.avatar-qol and dev.whyknot.vrcfury-qol via the sync-to-downstream script; the standalone package is optional and primarily useful for the upcoming log viewer / settings provider UIs.",
+  "description": "Source of truth for the shared Editor-only utilities bundled into dev.whyknot.avatar-qol and dev.whyknot.vrcfury-qol via scripts/sync-to-downstream.ps1. Not distributed via VPM -- the helpers ship inside each downstream's Editor/Internal/ tree to avoid version-coupling.",
   "author": {
     "name": "WhyKnot",
     "url": "https://whyknot.dev"
   },
   "license": "GPL-3.0-or-later",
-  "url": "https://github.com/RealWhyKnot/wk-core/releases/download/v1.2.0/dev.whyknot.core-1.2.0.zip",
   "documentationUrl": "https://github.com/RealWhyKnot/wk-core",
   "changelogUrl": "https://github.com/RealWhyKnot/wk-core/blob/main/CHANGELOG.md",
   "vpmDependencies": {},
