@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file. Format foll
 
 ## Unreleased
 
+### Added
+- **hot-reload+ci:** Watch Packages/, autoload logger version (1.1.3) (fe87d05)
+
 ---
 
 ## [1.1.2](https://github.com/RealWhyKnot/wk-core/releases/tag/v1.1.2) -- 2026-05-22
