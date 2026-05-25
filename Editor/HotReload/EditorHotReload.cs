@@ -48,7 +48,22 @@ namespace WhyKnot.Core.HotReload {
     internal static class EditorHotReload {
         private const double DebounceSeconds = 0.4;
         private const int MaxSessions = 3;
-        private const string LogSubpath = "WhyKnot/Logs/dev.whyknot.core.hotreload";
+        // Derived once from the executing assembly so a copy of this file
+        // bundled into a downstream package writes to a per-package log
+        // directory automatically. The wk-core copy logs under
+        // "WhyKnot/Logs/dev.whyknot.core.hotreload"; a copy inside
+        // dev.whyknot.avatar-qol logs under that package's name instead.
+        // No need to rewrite the constant when the sync script copies
+        // this file into a downstream.
+        private static readonly string LogSubpath = "WhyKnot/Logs/" + ResolveAsmIdentity() + ".hotreload";
+
+        private static string ResolveAsmIdentity() {
+            try {
+                return typeof(EditorHotReload).Assembly.GetName().Name;
+            } catch {
+                return "dev.whyknot.core";
+            }
+        }
 
         private static readonly List<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
         private static volatile bool _pendingRefresh;
