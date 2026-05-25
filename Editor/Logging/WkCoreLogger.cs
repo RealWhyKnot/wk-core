@@ -10,10 +10,12 @@
 // WkLoggerRegistry, so by the time any other code in this package runs,
 // the wk-core entry is available via WkLoggerRegistry.Get(PackageId).
 //
-// When wk-core's package.json version changes, bump the Version constant
-// below so the session header in the log file reports the right value.
+// Version resolves from UnityEditor.PackageManager.PackageInfo.FindForAssembly
+// so package.json stays the single source of truth -- nothing else to
+// bump on release. CI also enforces this via .github/workflows/version-guard.yml.
 
 using UnityEditor;
+using UnityEditor.PackageManager;
 
 namespace WhyKnot.Core.Logging {
 
@@ -22,16 +24,24 @@ namespace WhyKnot.Core.Logging {
 
         public const string PackageId = "dev.whyknot.core";
         public const string DisplayName = "WK Core";
-        public const string Version = "1.1.2";
+
+        public static readonly string Version = ResolveVersion();
 
         public static readonly WkLogger Instance = new WkLogger(PackageId, DisplayName, Version);
 
         static WkCoreLogger() {
-            // The field initializer above already created and registered
-            // the logger. This static ctor exists so [InitializeOnLoad]
-            // has something to anchor on: the attribute fires the type
-            // initialiser, which runs the field initialiser, which builds
-            // the WkLogger and registers it.
+            // Field initializers above already created and registered the
+            // logger. The [InitializeOnLoad] anchor on this static ctor
+            // tells Unity to force-load the type at Editor startup.
+        }
+
+        private static string ResolveVersion() {
+            // FindForAssembly returns null when the package is dropped loose
+            // under Assets/ instead of installed via VPM. Fall back to a
+            // sentinel rather than throwing -- a missing version label in
+            // the log header is recoverable; an Editor-init exception is not.
+            var info = PackageInfo.FindForAssembly(typeof(WkCoreLogger).Assembly);
+            return info != null && !string.IsNullOrEmpty(info.version) ? info.version : "unknown";
         }
     }
 }

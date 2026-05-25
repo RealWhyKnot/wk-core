@@ -18,8 +18,13 @@
 // files system-wide.
 //
 // Behaviour:
-//   * FileSystemWatcher on Application.dataPath (recursive, *.cs) flips
-//     a flag whenever a script is written, created, renamed or deleted.
+//   * Two FileSystemWatchers (recursive, *.cs) cover both roots Unity
+//     treats as live script source: `<project>/Assets/` (the legacy
+//     drop-scripts-anywhere workflow) and `<project>/Packages/` (where
+//     local-deployed packages like dev.whyknot.* iterate). Either watcher
+//     flipping the flag triggers a refresh. Library/PackageCache/ is
+//     deliberately not watched because read-only VPM installs don't
+//     iterate and the cache churns on its own.
 //   * EditorApplication.update debounces the flag (~0.4 s) and then
 //     calls AssetDatabase.Refresh(). Unity happily refreshes from a
 //     scripted call even when the editor window isn't focused, which
@@ -30,6 +35,7 @@
 //     assembly summaries and per-file change events stay file-only.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -44,7 +50,7 @@ namespace WhyKnot.Core.HotReload {
         private const int MaxSessions = 3;
         private const string LogSubpath = "WhyKnot/Logs/dev.whyknot.core.hotreload";
 
-        private static FileSystemWatcher _watcher;
+        private static readonly List<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
         private static volatile bool _pendingRefresh;
         private static double _refreshDueAt;
         private static int _refreshCounter;
@@ -63,28 +69,27 @@ namespace WhyKnot.Core.HotReload {
                 return;
             }
             if (string.IsNullOrEmpty(dataPath)) {
-                LogError("Application.dataPath was empty; watcher not started");
+                LogError("Application.dataPath was empty; watchers not started");
                 return;
             }
 
+            StartWatcher(dataPath, "Assets");
+
+            // Sibling Packages/ directory: where local-deployed packages
+            // (e.g. scripts/deploy-to-local.ps1 mirroring into an avatar
+            // project) actually land. Without this watcher, iterating on a
+            // deployed package only refreshes when the user clicks Unity
+            // back into focus -- which defeats the point of the local-deploy
+            // workflow.
             try {
-                _watcher = new FileSystemWatcher(dataPath) {
-                    IncludeSubdirectories = true,
-                    Filter = "*.cs",
-                    NotifyFilter = NotifyFilters.LastWrite
-                                 | NotifyFilters.FileName
-                                 | NotifyFilters.Size
-                                 | NotifyFilters.CreationTime,
-                    EnableRaisingEvents = true,
-                };
-                _watcher.Changed += OnChange;
-                _watcher.Created += OnChange;
-                _watcher.Deleted += OnChange;
-                _watcher.Renamed += OnRename;
-                _watcher.Error   += (s, e) => LogWarn($"[Watcher] Error: {e.GetException()?.Message}");
-                LogInfo($"[Watcher] Active on {dataPath}");
+                var projectRoot = Path.GetDirectoryName(dataPath);
+                if (!string.IsNullOrEmpty(projectRoot)) {
+                    var packagesPath = Path.Combine(projectRoot, "Packages");
+                    if (Directory.Exists(packagesPath)) StartWatcher(packagesPath, "Packages");
+                    else LogDebug($"[Watcher] No Packages directory at {packagesPath}; skipped.");
+                }
             } catch (Exception ex) {
-                LogException(ex, "[Watcher] Failed to start");
+                LogException(ex, "[Watcher] Failed to derive Packages path");
             }
 
             EditorApplication.update += Tick;
@@ -93,6 +98,29 @@ namespace WhyKnot.Core.HotReload {
             CompilationPipeline.compilationFinished += OnCompileFinished;
             AssemblyReloadEvents.beforeAssemblyReload += () => LogDebug("[Reload] beforeAssemblyReload");
             AssemblyReloadEvents.afterAssemblyReload  += () => LogDebug("[Reload] afterAssemblyReload");
+        }
+
+        private static void StartWatcher(string root, string label) {
+            try {
+                var w = new FileSystemWatcher(root) {
+                    IncludeSubdirectories = true,
+                    Filter = "*.cs",
+                    NotifyFilter = NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.Size
+                                 | NotifyFilters.CreationTime,
+                    EnableRaisingEvents = true,
+                };
+                w.Changed += OnChange;
+                w.Created += OnChange;
+                w.Deleted += OnChange;
+                w.Renamed += OnRename;
+                w.Error   += (s, e) => LogWarn($"[Watcher:{label}] Error: {e.GetException()?.Message}");
+                _watchers.Add(w);
+                LogInfo($"[Watcher] Active on {root} ({label})");
+            } catch (Exception ex) {
+                LogException(ex, $"[Watcher] Failed to start on {root}");
+            }
         }
 
         // ----- change detection ------------------------------------------
