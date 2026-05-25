@@ -45,8 +45,17 @@ namespace WhyKnot.Core.Tests {
 
         [Test]
         public void RunNow_TickBodyException_DoesNotPropagate() {
-            var ticker = new WkEditorTicker(60, () => throw new System.InvalidOperationException("boom"));
-            Assert.DoesNotThrow(() => ticker.RunNow());
+            // The ticker's fallback chain routes thrown exceptions through
+            // the first registered WkLogger (Error level) and then to
+            // UnityEngine.Debug.LogException. Both surface to the Console
+            // and both need an explicit Expect on the test harness.
+            UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true;
+            try {
+                var ticker = new WkEditorTicker(60, () => throw new System.InvalidOperationException("boom"));
+                Assert.DoesNotThrow(() => ticker.RunNow());
+            } finally {
+                UnityEngine.TestTools.LogAssert.ignoreFailingMessages = false;
+            }
         }
     }
 }

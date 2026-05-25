@@ -10,14 +10,17 @@ namespace WhyKnot.Core.Tests {
 
         private sealed class UnityEngineProbe : WkReflectionCache {
             public System.Type Vector3Type;
-            public FieldInfo ZeroField;
+            public FieldInfo XField;
             protected override string TargetAssemblyName => "UnityEngine.CoreModule";
 
             protected override bool TryResolveMembers(Assembly asm, out string error) {
                 Vector3Type = asm.GetType("UnityEngine.Vector3");
                 if (Vector3Type == null) { error = "Vector3 missing"; return false; }
-                ZeroField = Vector3Type.GetField("zero", BindingFlags.Public | BindingFlags.Static);
-                if (ZeroField == null) { error = "Vector3.zero missing"; return false; }
+                // Probe a public instance field rather than a static
+                // member: Vector3.zero is a property in modern Unity and
+                // GetField("zero") would return null.
+                XField = Vector3Type.GetField("x", BindingFlags.Public | BindingFlags.Instance);
+                if (XField == null) { error = "Vector3.x missing"; return false; }
                 error = null;
                 return true;
             }
@@ -48,6 +51,7 @@ namespace WhyKnot.Core.Tests {
             Assert.IsTrue(cache.IsResolved);
             Assert.IsNotNull(cache.TargetAssembly);
             Assert.IsNotNull(cache.Vector3Type);
+            Assert.IsNotNull(cache.XField);
 
             // Second call must be a no-op (idempotent).
             Assert.IsTrue(cache.TryEnsure(out _));

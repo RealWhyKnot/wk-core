@@ -94,6 +94,10 @@ namespace WhyKnot.Core.Tests {
             try { throw new InvalidOperationException("boom"); }
             catch (InvalidOperationException caught) { ex = caught; }
 
+            // Exception() mirrors the headline at Error level via Write(),
+            // then the exception itself via Debug.LogException. Both need
+            // an Expect or the test harness flags the unexpected Error.
+            LogAssert.Expect(LogType.Error, "[Test] during my test -- InvalidOperationException: boom");
             LogAssert.Expect(LogType.Exception, "InvalidOperationException: boom");
             logger.Exception(ex, "during my test");
 
