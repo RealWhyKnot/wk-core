@@ -46,5 +46,61 @@ namespace WhyKnot.Core.Tests {
 
             Assert.AreEqual("My Avatar/Left Hand", PathUtility.GetGameObjectPath(child));
         }
+
+        [Test]
+        public void GetRelativePath_DirectChild() {
+            _root = new GameObject("Root");
+            var child = new GameObject("Child");
+            child.transform.SetParent(_root.transform);
+
+            Assert.AreEqual("Child", PathUtility.GetRelativePath(_root.transform, child.transform));
+        }
+
+        [Test]
+        public void GetRelativePath_DeepDescendant() {
+            _root = new GameObject("Root");
+            var a = new GameObject("A");
+            a.transform.SetParent(_root.transform);
+            var b = new GameObject("B");
+            b.transform.SetParent(a.transform);
+            var c = new GameObject("C");
+            c.transform.SetParent(b.transform);
+
+            Assert.AreEqual("A/B/C", PathUtility.GetRelativePath(_root.transform, c.transform));
+        }
+
+        [Test]
+        public void GetRelativePath_NotADescendant_ReturnsNull() {
+            _root = new GameObject("Root");
+            var sibling = new GameObject("Outside");
+
+            try {
+                Assert.IsNull(PathUtility.GetRelativePath(_root.transform, sibling.transform));
+            } finally {
+                Object.DestroyImmediate(sibling);
+            }
+        }
+
+        [Test]
+        public void GetRelativePath_SameTransform_ReturnsEmpty() {
+            _root = new GameObject("Root");
+            Assert.AreEqual(string.Empty, PathUtility.GetRelativePath(_root.transform, _root.transform));
+        }
+
+        [Test]
+        public void GetRelativePath_NullArgs_ReturnsNull() {
+            _root = new GameObject("Root");
+            Assert.IsNull(PathUtility.GetRelativePath((Transform) null, _root.transform));
+            Assert.IsNull(PathUtility.GetRelativePath(_root.transform, (Transform) null));
+        }
+
+        [Test]
+        public void GetRelativePath_GameObjectOverload_WorksToo() {
+            _root = new GameObject("Root");
+            var child = new GameObject("Child");
+            child.transform.SetParent(_root.transform);
+
+            Assert.AreEqual("Child", PathUtility.GetRelativePath(_root, child));
+        }
     }
 }

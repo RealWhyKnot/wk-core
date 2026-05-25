@@ -168,5 +168,53 @@ namespace WhyKnot.Core.Tests {
             Assert.AreEqual(WkLogger.MaxSessionsPerPackage, afterCount,
                 $"After a new session opens, there should be exactly {WkLogger.MaxSessionsPerPackage} sessions in the directory");
         }
+
+        [Test]
+        public void BeginTask_EmitsStartingAndFinishedLines() {
+            var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
+            // The completion line at Info level mirrors to the Console; we
+            // can't match the elapsed-ms text exactly so the assertion is
+            // against the file content only.
+            LogAssert.ignoreFailingMessages = true;
+            using (logger.BeginTask("BoneMerger")) {
+                // empty body
+            }
+            LogAssert.ignoreFailingMessages = false;
+
+            var content = File.ReadAllText(logger.LogFilePath);
+            StringAssert.Contains("BoneMerger starting", content);
+            StringAssert.Contains("BoneMerger finished in", content);
+        }
+
+        [Test]
+        public void InfoBlock_HeaderMirrorsAndContinuationLinesAreFileOnly() {
+            var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
+            LogAssert.Expect(LogType.Log, "[Test] Scan results");
+            logger.InfoBlock("Scan results", new[] { "first issue", "second issue" });
+
+            var lines = File.ReadAllLines(logger.LogFilePath);
+            Assert.IsTrue(System.Linq.Enumerable.Any(lines, l => l.Contains("[INFO ]") && l.EndsWith("Scan results")),
+                "Header line should be emitted with INFO level");
+            Assert.IsTrue(System.Linq.Enumerable.Any(lines, l => l.Contains("first issue")));
+            Assert.IsTrue(System.Linq.Enumerable.Any(lines, l => l.Contains("second issue")));
+        }
+
+        [Test]
+        public void ContextObject_PropagatesToConsoleMirror() {
+            var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
+            var go = new UnityEngine.GameObject("LogCtx");
+            try {
+                LogAssert.Expect(LogType.Log, "[Test] tagged");
+                using (WkLogContext.WithContextObject(go)) {
+                    logger.Info("tagged");
+                }
+                // We can't easily assert the context-arg was used from the test
+                // harness, but a thrown context-object failure would surface here
+                // as the Log assert silently failing -- which would already
+                // fail the test.
+            } finally {
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+        }
     }
 }

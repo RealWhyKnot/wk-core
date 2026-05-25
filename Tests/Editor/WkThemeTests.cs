@@ -71,17 +71,20 @@ namespace WhyKnot.Core.Tests {
         }
 
         private static void AssertVariantFinite(WkTheme.Variant v, string label) {
-            AssertFiniteColor(v.Background, label + ".Background");
-            AssertFiniteColor(v.BackgroundAlt, label + ".BackgroundAlt");
-            AssertFiniteColor(v.Accent, label + ".Accent");
-            AssertFiniteColor(v.Warning, label + ".Warning");
-            AssertFiniteColor(v.Success, label + ".Success");
-            AssertFiniteColor(v.Info, label + ".Info");
-            AssertFiniteColor(v.Danger, label + ".Danger");
-            AssertFiniteColor(v.Divider, label + ".Divider");
-            AssertFiniteColor(v.TextPrimary, label + ".TextPrimary");
-            AssertFiniteColor(v.TextMuted, label + ".TextMuted");
-            AssertFiniteColor(v.Border, label + ".Border");
+            AssertFiniteColor(v.Background,         label + ".Background");
+            AssertFiniteColor(v.BackgroundAlt,      label + ".BackgroundAlt");
+            AssertFiniteColor(v.BackgroundEmphasis, label + ".BackgroundEmphasis");
+            AssertFiniteColor(v.Accent,             label + ".Accent");
+            AssertFiniteColor(v.Warning,            label + ".Warning");
+            AssertFiniteColor(v.Success,            label + ".Success");
+            AssertFiniteColor(v.Info,               label + ".Info");
+            AssertFiniteColor(v.Danger,             label + ".Danger");
+            AssertFiniteColor(v.Divider,            label + ".Divider");
+            AssertFiniteColor(v.DividerSubtle,      label + ".DividerSubtle");
+            AssertFiniteColor(v.TextPrimary,        label + ".TextPrimary");
+            AssertFiniteColor(v.TextMuted,          label + ".TextMuted");
+            AssertFiniteColor(v.Border,             label + ".Border");
+            AssertFiniteColor(v.ButtonHover,        label + ".ButtonHover");
         }
 
         private static void AssertFiniteColor(Color c, string label) {

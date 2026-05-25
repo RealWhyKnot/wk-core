@@ -36,6 +36,10 @@ namespace WhyKnot.Core.Tests {
             AssertCached(() => WkStyles.BadgePillStyle);
             AssertCached(() => WkStyles.CardSelected);
             AssertCached(() => WkStyles.FoldoutHeader);
+            AssertCached(() => WkStyles.Caption);
+            AssertCached(() => WkStyles.Code);
+            AssertCached(() => WkStyles.TitleBarStyle);
+            AssertCached(() => WkStyles.RowAlt);
         }
 
         [Test]
@@ -43,9 +47,31 @@ namespace WhyKnot.Core.Tests {
             Assert.IsTrue(System.Enum.IsDefined(typeof(NoticeKind), NoticeKind.Info));
             Assert.IsTrue(System.Enum.IsDefined(typeof(NoticeKind), NoticeKind.Warning));
             Assert.IsTrue(System.Enum.IsDefined(typeof(NoticeKind), NoticeKind.Success));
-            // Deliberately no Error -- callers should use Warning for recoverable
-            // conditions and a real exception for the rest. Lock this in.
-            Assert.AreEqual(3, System.Enum.GetValues(typeof(NoticeKind)).Length);
+            Assert.IsTrue(System.Enum.IsDefined(typeof(NoticeKind), NoticeKind.Danger));
+            Assert.AreEqual(4, System.Enum.GetValues(typeof(NoticeKind)).Length);
+        }
+
+        [Test]
+        public void ColorForKind_RoutesEachKindThroughTheTheme() {
+            using (WkStyles.Scope(WkTheme.WhyKnot)) {
+                Assert.AreEqual(WkStyles.ColorInfo,    WkStyles.ColorForKind(NoticeKind.Info));
+                Assert.AreEqual(WkStyles.ColorWarning, WkStyles.ColorForKind(NoticeKind.Warning));
+                Assert.AreEqual(WkStyles.ColorSuccess, WkStyles.ColorForKind(NoticeKind.Success));
+                Assert.AreEqual(WkStyles.ColorDanger,  WkStyles.ColorForKind(NoticeKind.Danger));
+            }
+        }
+
+        [Test]
+        public void ExtendedPalette_ReturnsFiniteColors() {
+            AssertFiniteColor(WkStyles.ColorDanger);
+            AssertFiniteColor(WkStyles.ColorDividerSubtle);
+            AssertFiniteColor(WkStyles.ColorBackground);
+            AssertFiniteColor(WkStyles.ColorBackgroundAlt);
+            AssertFiniteColor(WkStyles.ColorBackgroundEmphasis);
+            AssertFiniteColor(WkStyles.ColorTextPrimary);
+            AssertFiniteColor(WkStyles.ColorTextMuted);
+            AssertFiniteColor(WkStyles.ColorBorder);
+            AssertFiniteColor(WkStyles.ColorButtonHover);
         }
 
         [Test]
