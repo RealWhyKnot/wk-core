@@ -110,6 +110,7 @@ namespace WhyKnot.Core.Logging {
             _logFilePath = Path.Combine(_logDirectory, BuildSessionFileName(DateTime.Now));
             OpenWriter();
             WriteSessionHeader();
+            Flush();   // header is on-disk immediately so anything reading the path right after construction sees it
             WkLoggerRegistry.Register(this);
             SubscribeLifecycle();
         }
@@ -120,7 +121,13 @@ namespace WhyKnot.Core.Logging {
             lock (_writeLock) {
                 if (_writerOpen) return;
                 try {
-                    var stream = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read);
+                    // FileShare.ReadWrite lets other processes (Unity itself,
+                    // a log viewer tailing the file, the test harness reading
+                    // it via File.ReadAllText) open the same file for reading
+                    // while we have the writer open. Without ReadWrite we
+                    // trip Sharing violation on Windows the moment any other
+                    // hand reaches for the file.
+                    var stream = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                     _writer = new StreamWriter(stream) { AutoFlush = false };
                     _writerOpen = true;
                 } catch {
@@ -391,7 +398,7 @@ namespace WhyKnot.Core.Logging {
                     // disk error, paused state). Open-per-line so we still
                     // capture content -- skipped flushes simply mean the
                     // log file lags a few lines behind events.
-                    using (var fs = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
+                    using (var fs = new FileStream(_logFilePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                     using (var writer = new StreamWriter(fs)) {
                         writer.WriteLine(line);
                     }

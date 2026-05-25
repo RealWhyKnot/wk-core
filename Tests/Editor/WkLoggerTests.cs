@@ -35,6 +35,11 @@ namespace WhyKnot.Core.Tests {
 
         [TearDown]
         public void TearDown() {
+            // Force a moment for the buffered StreamWriter to release file
+            // handles after the test's WkLogger goes out of scope -- on
+            // Windows otherwise the recursive delete trips a Sharing violation.
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
             try {
                 if (Directory.Exists(_testLogDir)) Directory.Delete(_testLogDir, recursive: true);
             } catch { /* ignore */ }
@@ -45,7 +50,7 @@ namespace WhyKnot.Core.Tests {
             var logger = new WkLogger(_testPackageId, "Test Package", "0.0.1");
             Assert.IsTrue(File.Exists(logger.LogFilePath), "Session log file should exist after construction");
 
-            var content = File.ReadAllText(logger.LogFilePath);
+            var content = ReadAllTextAllowingActiveWriter(logger.LogFilePath);
             StringAssert.Contains("Test Package", content);
             StringAssert.Contains(_testPackageId, content);
             StringAssert.Contains("0.0.1", content);
@@ -58,10 +63,30 @@ namespace WhyKnot.Core.Tests {
             var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
             LogAssert.Expect(LogType.Log, "[Test] hello info");
             logger.Info("hello info");
+            logger.Flush();   // Info is buffered until next Warning/Error/Exception; force durability for the read below
 
-            var lines = File.ReadAllLines(logger.LogFilePath);
+            var lines = ReadAllLinesAllowingActiveWriter(logger.LogFilePath);
             Assert.IsTrue(lines.Any(l => l.Contains("[INFO ]") && l.EndsWith("hello info")),
                 "Expected an INFO-tagged line ending with 'hello info'");
+        }
+
+        private static string[] ReadAllLinesAllowingActiveWriter(string path) {
+            // The long-lived buffered writer keeps the log file open with
+            // FileShare.ReadWrite; File.ReadAllText on Windows opens it
+            // with FileShare.Read which conflicts. Read via an explicit
+            // FileShare.ReadWrite stream so we coexist with the live writer.
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var sr = new StreamReader(fs)) {
+                var content = sr.ReadToEnd();
+                return content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+
+        private static string ReadAllTextAllowingActiveWriter(string path) {
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var sr = new StreamReader(fs)) {
+                return sr.ReadToEnd();
+            }
         }
 
         [Test]
@@ -72,7 +97,7 @@ namespace WhyKnot.Core.Tests {
             logger.Warning("a warning");
             logger.Error("an error");
 
-            var lines = File.ReadAllLines(logger.LogFilePath);
+            var lines = ReadAllLinesAllowingActiveWriter(logger.LogFilePath);
             Assert.IsTrue(lines.Any(l => l.Contains("[WARN ]") && l.EndsWith("a warning")), "Expected WARN line");
             Assert.IsTrue(lines.Any(l => l.Contains("[ERROR]") && l.EndsWith("an error")), "Expected ERROR line");
         }
@@ -82,8 +107,9 @@ namespace WhyKnot.Core.Tests {
             var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
             // No LogAssert.Expect -- Debug is file-only by default.
             logger.Debug("verbose details");
+            logger.Flush();   // Debug is buffered until next Warning/Error/Exception; force durability
 
-            var content = File.ReadAllText(logger.LogFilePath);
+            var content = ReadAllTextAllowingActiveWriter(logger.LogFilePath);
             StringAssert.Contains("verbose details", content);
         }
 
@@ -101,7 +127,7 @@ namespace WhyKnot.Core.Tests {
             LogAssert.Expect(LogType.Exception, "InvalidOperationException: boom");
             logger.Exception(ex, "during my test");
 
-            var content = File.ReadAllText(logger.LogFilePath);
+            var content = ReadAllTextAllowingActiveWriter(logger.LogFilePath);
             StringAssert.Contains("during my test", content);
             StringAssert.Contains("InvalidOperationException", content);
             StringAssert.Contains("boom", content);
@@ -184,8 +210,9 @@ namespace WhyKnot.Core.Tests {
                 // empty body
             }
             LogAssert.ignoreFailingMessages = false;
+            logger.Flush();
 
-            var content = File.ReadAllText(logger.LogFilePath);
+            var content = ReadAllTextAllowingActiveWriter(logger.LogFilePath);
             StringAssert.Contains("BoneMerger starting", content);
             StringAssert.Contains("BoneMerger finished in", content);
         }
@@ -195,8 +222,9 @@ namespace WhyKnot.Core.Tests {
             var logger = new WkLogger(_testPackageId, "Test", "0.0.1");
             LogAssert.Expect(LogType.Log, "[Test] Scan results");
             logger.InfoBlock("Scan results", new[] { "first issue", "second issue" });
+            logger.Flush();
 
-            var lines = File.ReadAllLines(logger.LogFilePath);
+            var lines = ReadAllLinesAllowingActiveWriter(logger.LogFilePath);
             Assert.IsTrue(System.Linq.Enumerable.Any(lines, l => l.Contains("[INFO ]") && l.EndsWith("Scan results")),
                 "Header line should be emitted with INFO level");
             Assert.IsTrue(System.Linq.Enumerable.Any(lines, l => l.Contains("first issue")));
