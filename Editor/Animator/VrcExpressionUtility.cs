@@ -80,7 +80,7 @@ namespace WhyKnot.Core.Animators {
             if (current != null) Array.Copy(current, next, current.Length);
             next.SetValue(parameter, next.Length - 1);
             parametersField.SetValue(expressionParameters, next);
-            EditorUtility.SetDirty(expressionParameters as Object);
+            EditorUtility.SetDirty(expressionParameters as UnityEngine.Object);
             return parameter;
         }
 
@@ -105,7 +105,7 @@ namespace WhyKnot.Core.Animators {
             // on whichever shape exists.
             SetParameterRef(control, parameterName, onValue);
             AddControlToMenu(expressionsMenu, control);
-            EditorUtility.SetDirty(expressionsMenu as Object);
+            EditorUtility.SetDirty(expressionsMenu as UnityEngine.Object);
             return control;
         }
 
@@ -125,7 +125,7 @@ namespace WhyKnot.Core.Animators {
                 : null);
             SetField(control, "subMenu", submenu);
             AddControlToMenu(expressionsMenu, control);
-            EditorUtility.SetDirty(expressionsMenu as Object);
+            EditorUtility.SetDirty(expressionsMenu as UnityEngine.Object);
             return control;
         }
 

@@ -31,10 +31,10 @@ namespace WhyKnot.Core.Logging {
     public sealed class WkLogViewerWindow : EditorWindow {
 
         /// <summary>Open or focus the viewer. Call from downstream [MenuItem] hooks.</summary>
-        public static WkLogViewerWindow Show() {
+        public static WkLogViewerWindow Open() {
             var window = GetWindow<WkLogViewerWindow>(false, "WhyKnot Logs");
             window.minSize = new Vector2(540, 360);
-            window.Show();
+            window.Show();   // inherited EditorWindow.Show() to make the window visible
             return window;
         }
 
