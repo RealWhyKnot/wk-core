@@ -3,9 +3,9 @@
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 [![Unity](https://img.shields.io/badge/Unity-2022.3-000000.svg?logo=unity)](https://unity.com/)
 
-Shared Editor-only utilities for the WhyKnot VRChat tools. Installed automatically as a dependency of [vrc-avatar-qol](https://github.com/RealWhyKnot/vrc-avatar-qol) and [vrcfury-qol](https://github.com/RealWhyKnot/vrcfury-qol).
+Shared Editor-only utilities for the WhyKnot VRChat tools. The source of truth for the helpers bundled into [vrc-avatar-qol](https://github.com/RealWhyKnot/vrc-avatar-qol) and [vrcfury-qol](https://github.com/RealWhyKnot/vrcfury-qol) via `scripts/sync-to-downstream.ps1` -- each consumer carries its own copy under `Editor/Internal/` to avoid the VCC `>=` version-floor footgun.
 
-Most users will never interact with this package directly -- VCC pulls it in when you install one of the consumer packages.
+Most users will never install this package directly. It is published to `vpm.whyknot.dev` for two reasons: as a discoverable source artefact for the bundled helpers, and to host the upcoming log-viewer and settings-provider UIs that live in this assembly only (not the bundled copies).
 
 ## What's inside
 
