@@ -11,9 +11,17 @@ All notable changes to this project will be documented in this file. Format foll
 
 ### Added
 - **hot-reload+ci:** Watch Packages/, autoload logger version (1.1.3) (fe87d05)
+- **sync:** Bundle every 1.2.0 helper and handle the bare WhyKnot.Core namespace (2fff53c)
+- **scaffolding:** Add WkMenuPaths constants, WkToolWindow + WkInspectorEditor base classes (bf7c15f)
+- **logging:** Add WkLogContext scope-stack and WkLogger BeginTask/InfoBlock/WarningBlock/ErrorBlock (26db06f)
+- **styling:** Expand primitive set, broaden theme palette, theme-route inspector chrome (c636954)
+- **reflection,utilities:** Add reflection, global-id, json-clone, ticker, prefs helpers (3541003)
+- **utilities:** Broaden utility surface (paths, avatar lookups, mesh, blendshape, folder, undo) (c4e1e36)
 
 ### Fixed
 - **logger:** Qualify PackageInfo to avoid ambiguity with UnityEditor.PackageInfo (13ef5f4)
+- **tests:** Handle headless EditorStyles, Vector3.zero-as-property, and Error+Exception double-mirror (8b18d16)
+- **logging,undo:** Qualify Object as UnityEngine.Object to avoid CS0104 ambiguity (a88ba4f)
 
 ---
 
