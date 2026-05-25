@@ -44,30 +44,51 @@ $internal = Join-Path $DestRepoRoot 'Editor/Internal'
 
 # Files to bundle. WkCoreLogger and AssemblyInfo are wk-core-only and
 # stay behind; everything else is shared infrastructure each downstream
-# needs.
+# needs. Files at Editor/<Name>.cs (no sub-folder) land in the bare
+# WhyKnot.Core namespace and rely on the bare-root rewrite entry below.
 $filesToBundle = @(
     'Editor/HotReload/EditorHotReload.cs',
     'Editor/Logging/WkLogger.cs',
     'Editor/Logging/WkLoggerRegistry.cs',
+    'Editor/Logging/WkLogContext.cs',
     'Editor/Reflection/EditorElementWalker.cs',
+    'Editor/Reflection/WkReflection.cs',
+    'Editor/Reflection/WkReflectionCache.cs',
+    'Editor/Reflection/WkGlobalId.cs',
+    'Editor/Reflection/WkJsonClone.cs',
     'Editor/Styling/WkStyles.cs',
     'Editor/Styling/WkTheme.cs',
     'Editor/Utilities/AvatarUtility.cs',
+    'Editor/Utilities/BlendShapeUtility.cs',
     'Editor/Utilities/FbxMeshUtility.cs',
+    'Editor/Utilities/FolderUtility.cs',
     'Editor/Utilities/HumanoidSideMap.cs',
-    'Editor/Utilities/PathUtility.cs'
+    'Editor/Utilities/MeshUtility.cs',
+    'Editor/Utilities/PathUtility.cs',
+    'Editor/Utilities/UndoUtility.cs',
+    'Editor/Utilities/WkEditorPrefs.cs',
+    'Editor/Utilities/WkEditorTicker.cs',
+    'Editor/WkInspectorEditor.cs',
+    'Editor/WkMenuPaths.cs',
+    'Editor/WkToolWindow.cs'
 )
 
 # Sub-namespace mapping. Source namespace -> Destination sub-namespace.
 # Same shape on both sides so file references inside the copied set keep
 # working after the rewrite (e.g. WkStyles using WkTheme from the same
 # Styling sub-namespace).
+#
+# The bare 'WhyKnot.Core' entry catches root-level types (WkToolWindow,
+# WkInspectorEditor, WkMenuPaths). Rewrite-Namespaces iterates in
+# length-descending order so the longer 'WhyKnot.Core.<sub>' entries
+# match first; the bare entry only fires on what's left over.
 $nsMap = @{
     'WhyKnot.Core.HotReload'   = "$($cfg.Namespace).HotReload"
     'WhyKnot.Core.Logging'     = "$($cfg.Namespace).Logging"
     'WhyKnot.Core.Reflection'  = "$($cfg.Namespace).Reflection"
     'WhyKnot.Core.Styling'     = "$($cfg.Namespace).Styling"
     'WhyKnot.Core.Utilities'   = "$($cfg.Namespace).Utilities"
+    'WhyKnot.Core'             = "$($cfg.Namespace)"
 }
 
 Write-Host "wk-core source : $src"
@@ -85,7 +106,12 @@ if (Test-Path $internal) {
 New-Item -ItemType Directory -Path $internal -Force | Out-Null
 
 function Rewrite-Namespaces([string]$text) {
-    foreach ($pair in $nsMap.GetEnumerator()) {
+    # Iterate by key length descending so the more-specific
+    # 'WhyKnot.Core.Styling' entry matches before the bare-root
+    # 'WhyKnot.Core' entry; otherwise the bare-root rewrite would
+    # consume the prefix and leave a dangling '.Styling' segment.
+    $sorted = $nsMap.GetEnumerator() | Sort-Object { $_.Key.Length } -Descending
+    foreach ($pair in $sorted) {
         $text = $text.Replace($pair.Key, $pair.Value)
     }
     return $text
