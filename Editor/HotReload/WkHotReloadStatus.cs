@@ -28,6 +28,8 @@ namespace WhyKnot.Core.HotReload {
         }
 
         private Vector2 _scroll;
+        private Vector2 _bodyScroll;
+        private static GUIStyle _brandFooterStyle;
 
         private void OnEnable() {
             // Keep the view fresh while it's visible. Hot-reload events
@@ -49,14 +51,24 @@ namespace WhyKnot.Core.HotReload {
         }
 
         private void OnGUI() {
-            EditorGUILayout.LabelField("Hot Reload Status", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
+            using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true))) {
+                EditorGUILayout.LabelField("Hot Reload Status", EditorStyles.boldLabel);
+                DrawAnimatedAccentLine();
 
-            DrawSummary();
-            EditorGUILayout.Space();
-            DrawRecentEvents();
-            EditorGUILayout.Space();
-            DrawFooter();
+                using (var s = new EditorGUILayout.ScrollViewScope(
+                        _bodyScroll, false, false,
+                        GUILayout.ExpandWidth(true),
+                        GUILayout.ExpandHeight(true))) {
+                    _bodyScroll = s.scrollPosition;
+                    DrawSummary();
+                    EditorGUILayout.Space();
+                    DrawRecentEvents();
+                }
+
+                DrawDivider();
+                DrawFooter();
+                DrawBrandFooter();
+            }
         }
 
         private void DrawSummary() {
@@ -88,7 +100,9 @@ namespace WhyKnot.Core.HotReload {
             using (new EditorGUILayout.HorizontalScope()) {
                 var path = EditorHotReload.LogFilePath;
                 using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(path))) {
-                    if (GUILayout.Button("Open Log in Explorer", GUILayout.Height(22))) {
+                    if (GUILayout.Button(
+                            new GUIContent("Open Log in Explorer", "Reveal the current hot-reload log file."),
+                            GUILayout.Height(22))) {
                         EditorUtility.RevealInFinder(path);
                     }
                 }
@@ -99,6 +113,47 @@ namespace WhyKnot.Core.HotReload {
                     EditorPrefs.SetBool("dev.whyknot.core.settings.hot-reload-enabled", next);
                 }
             }
+        }
+
+        private static GUIStyle BrandFooterStyle =>
+            _brandFooterStyle ??= new GUIStyle(EditorStyles.centeredGreyMiniLabel) {
+                fontSize = 10,
+                fontStyle = FontStyle.Italic,
+                alignment = TextAnchor.MiddleCenter,
+                richText = true,
+                wordWrap = true,
+                padding = new RectOffset(4, 4, 2, 2),
+            };
+
+        private static Color AnimatedAccentColor() {
+            var pulse = 0.5f + 0.5f * Mathf.Sin((float)EditorApplication.timeSinceStartup * 2.4f);
+            return Color.Lerp(new Color(0.23f, 0.56f, 0.78f), new Color(0.42f, 0.82f, 1f), pulse);
+        }
+
+        private static void DrawAnimatedAccentLine() {
+            var rect = EditorGUILayout.GetControlRect(false, 2f, GUILayout.ExpandWidth(true));
+            EditorGUI.DrawRect(rect, new Color(0.23f, 0.56f, 0.78f, 0.35f));
+            if (rect.width <= 1f) return;
+
+            var cycle = Mathf.Repeat((float)EditorApplication.timeSinceStartup, 2.8f) / 2.8f;
+            var width = Mathf.Clamp(rect.width * 0.28f, 48f, 180f);
+            var x = Mathf.Lerp(rect.x - width, rect.xMax, cycle);
+            EditorGUI.DrawRect(new Rect(x, rect.y, width, rect.height), AnimatedAccentColor());
+        }
+
+        private static void DrawDivider() {
+            var rect = EditorGUILayout.GetControlRect(false, 1f);
+            EditorGUI.DrawRect(rect, new Color(0f, 0f, 0f, 0.25f));
+        }
+
+        private static void DrawBrandFooter() {
+            var heartColor = ColorUtility.ToHtmlStringRGB(AnimatedAccentColor());
+            var text = "Made with <color=#" + heartColor + ">\u2665</color> by WhyKnot";
+            EditorGUILayout.LabelField(
+                new GUIContent(text, "Made with care by WhyKnot."),
+                BrandFooterStyle,
+                GUILayout.ExpandWidth(true),
+                GUILayout.MinHeight(18));
         }
     }
 }

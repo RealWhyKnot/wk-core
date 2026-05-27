@@ -40,6 +40,7 @@ namespace WhyKnot.Core.Tests {
             AssertCached(() => WkStyles.Code);
             AssertCached(() => WkStyles.TitleBarStyle);
             AssertCached(() => WkStyles.RowAlt);
+            AssertCached(() => WkStyles.BrandFooterStyle);
         }
 
         [Test]
@@ -79,6 +80,27 @@ namespace WhyKnot.Core.Tests {
             // 110 is the historical default; if this changes downstream call
             // sites that pass labelWidth explicitly may need a sanity check.
             Assert.AreEqual(110f, WkStyles.LabelColumn);
+        }
+
+        [Test]
+        public void BrandFooterText_IdentifiesWhyKnot() {
+            StringAssert.Contains("Made with", WkStyles.BrandFooterText);
+            StringAssert.Contains("\u2665", WkStyles.BrandFooterText);
+            StringAssert.Contains("WhyKnot", WkStyles.BrandFooterText);
+        }
+
+        [Test]
+        public void AnimatedAccentColor_ReturnsFiniteColors() {
+            AssertFiniteColor(WkStyles.AnimatedAccentColor(0));
+            AssertFiniteColor(WkStyles.AnimatedAccentColor(1.25));
+            AssertFiniteColor(WkStyles.AnimatedAccentColor(10));
+        }
+
+        [Test]
+        public void RepaintAnimatedChrome_AllowsNullWindow() {
+            double next = 0;
+            WkStyles.RepaintAnimatedChrome(null, ref next);
+            Assert.AreEqual(0, next);
         }
 
         private static void AssertFiniteColor(Color c) {
