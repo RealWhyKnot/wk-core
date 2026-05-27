@@ -87,6 +87,14 @@ namespace WhyKnot.Core.Tests {
             StringAssert.Contains("Made with", WkStyles.BrandFooterText);
             StringAssert.Contains("\u2665", WkStyles.BrandFooterText);
             StringAssert.Contains("WhyKnot", WkStyles.BrandFooterText);
+            Assert.AreEqual("WhyKnotLogo", WkStyles.BrandLogoAssetName);
+        }
+
+        [Test]
+        public void TitleContent_UsesBrandTitleAndTooltip() {
+            var content = WkStyles.TitleContent("Sample Tool", "Sample tooltip");
+            Assert.AreEqual("Sample Tool", content.text);
+            Assert.AreEqual("Sample tooltip", content.tooltip);
         }
 
         [Test]

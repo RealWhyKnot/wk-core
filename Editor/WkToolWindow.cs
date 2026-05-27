@@ -63,7 +63,7 @@ namespace WhyKnot.Core {
         }
 
         protected virtual void OnEnable() {
-            titleContent = new GUIContent(Title);
+            titleContent = WkStyles.TitleContent(Title);
             minSize = InitialMinSize;
             EditorApplication.update -= RepaintAnimatedChrome;
             if (AnimateChrome) EditorApplication.update += RepaintAnimatedChrome;

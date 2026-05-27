@@ -23,6 +23,7 @@ namespace WhyKnot.Core.HotReload {
         // for the same menu path when both downstreams are installed.
         public static void Open() {
             var w = GetWindow<WkHotReloadStatus>(false, "Hot Reload Status");
+            w.titleContent = new GUIContent("Hot Reload Status", BrandLogoTexture, "Hot Reload Status");
             w.minSize = new Vector2(460, 360);
             w.Show();
         }
@@ -30,6 +31,14 @@ namespace WhyKnot.Core.HotReload {
         private Vector2 _scroll;
         private Vector2 _bodyScroll;
         private static GUIStyle _brandFooterStyle;
+        private static Texture2D _brandLogo;
+        private static bool _brandLogoLoaded;
+
+        private static readonly string[] BrandLogoAssetPaths = {
+            "Packages/dev.whyknot.core/Editor/Assets/WhyKnotLogo.png",
+            "Packages/dev.whyknot.wk-vrc-qol/Editor/Internal/Assets/WhyKnotLogo.png",
+            "Packages/dev.whyknot.wk-vrcfury-qol/Editor/Internal/Assets/WhyKnotLogo.png",
+        };
 
         private void OnEnable() {
             // Keep the view fresh while it's visible. Hot-reload events
@@ -149,11 +158,56 @@ namespace WhyKnot.Core.HotReload {
         private static void DrawBrandFooter() {
             var heartColor = ColorUtility.ToHtmlStringRGB(AnimatedAccentColor());
             var text = "Made with <color=#" + heartColor + ">\u2665</color> by WhyKnot";
-            EditorGUILayout.LabelField(
-                new GUIContent(text, "Made with care by WhyKnot."),
-                BrandFooterStyle,
-                GUILayout.ExpandWidth(true),
-                GUILayout.MinHeight(18));
+            using (new EditorGUILayout.HorizontalScope(GUILayout.ExpandWidth(true), GUILayout.MinHeight(22))) {
+                if (BrandLogoTexture != null) {
+                    var rect = GUILayoutUtility.GetRect(
+                        38f,
+                        20f,
+                        GUILayout.Width(38f),
+                        GUILayout.Height(20f),
+                        GUILayout.ExpandWidth(false));
+                    var previous = GUI.color;
+                    GUI.color = new Color(1f, 1f, 1f, previous.a * 0.82f);
+                    GUI.DrawTexture(rect, BrandLogoTexture, ScaleMode.ScaleToFit, true);
+                    GUI.color = previous;
+                }
+
+                EditorGUILayout.LabelField(
+                    new GUIContent(text, "Made with care by WhyKnot."),
+                    BrandFooterStyle,
+                    GUILayout.ExpandWidth(true),
+                    GUILayout.MinHeight(20));
+            }
+        }
+
+        private static Texture2D BrandLogoTexture {
+            get {
+                if (!_brandLogoLoaded) {
+                    _brandLogo = LoadBrandLogoTexture();
+                    _brandLogoLoaded = true;
+                }
+                return _brandLogo;
+            }
+        }
+
+        private static Texture2D LoadBrandLogoTexture() {
+            foreach (var path in BrandLogoAssetPaths) {
+                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture != null) return texture;
+            }
+
+            var guids = AssetDatabase.FindAssets("WhyKnotLogo t:Texture2D");
+            foreach (var guid in guids) {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(path) || !path.EndsWith("/WhyKnotLogo.png", StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+
+                var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture != null) return texture;
+            }
+
+            return null;
         }
     }
 }
