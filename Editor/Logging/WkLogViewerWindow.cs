@@ -62,8 +62,7 @@ namespace WhyKnot.Core.Logging {
             ReloadCurrentLog();
         }
 
-        protected override void OnDisable() {
-            base.OnDisable();
+        private void OnDisable() {
             DisposeWatcher();
         }
 
