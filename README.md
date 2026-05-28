@@ -38,36 +38,35 @@ This repo is not distributed via VPM. There are no GitHub releases, no `vpm.whyk
 
 - **`WhyKnot.Core.HotReload.EditorHotReload`** -- `[InitializeOnLoad]` `FileSystemWatcher` on `Assets/**/*.cs` that triggers `AssetDatabase.Refresh()` even when Unity is unfocused. Per-assembly compile summary + errors routed through `WkCoreLogger.Instance`.
 
-## Installation
+## Distribution model
 
-You normally don't install this manually. Adding [vrc-avatar-qol](https://github.com/RealWhyKnot/vrc-avatar-qol) or [vrcfury-qol](https://github.com/RealWhyKnot/vrcfury-qol) through VCC pulls in `dev.whyknot.core` automatically because both list it as a `vpmDependencies` entry.
+This repo is source-only for end users. The `package.json` and asmdefs let wk-core compile and test as a standalone Unity package while developing the shared surface, but it is not published to the WhyKnot VPM listing.
 
-If you do need it standalone -- e.g. building a third-party package against the same shared surface -- add the WhyKnot VPM listing to VCC and pick **WK Core** from the package list:
+Downstream packages do not add `dev.whyknot.core` as a `vpmDependencies` entry. Instead, each package carries a synced copy under `Editor/Internal/`, with namespaces rewritten so multiple WhyKnot packages can coexist in one Unity project without duplicate types.
 
-1. <https://vpm.whyknot.dev/> -- the page redirects to a `vcc://` handler URL and VCC opens with the listing pre-filled.
-2. Or in VCC: **Settings -> Packages -> Add Repository**, paste `https://vpm.whyknot.dev/index.json`.
+## Syncing downstream packages
 
-Compiles into a `dev.whyknot.core.Editor` Editor-only assembly. No runtime code ships.
+From this repo:
 
-## Building a downstream package
-
-To depend on this from another VPM package, add to the consumer's `package.json`:
-
-```json
-"vpmDependencies": {
-  "dev.whyknot.core": ">=1.1.0"
-}
+```powershell
+.\scripts\sync-to-downstream.ps1 -Target wk-vrc-qol
+.\scripts\sync-to-downstream.ps1 -Target wk-vrcfury-qol
 ```
 
-And to the consumer's Editor `.asmdef`:
+The sync script copies the shared C# and USS files into the downstream package, rewrites `WhyKnot.Core.*` references to the package-local internal namespace, and removes files that no longer exist in wk-core.
 
-```json
-"references": [
-  "dev.whyknot.core.Editor"
-]
-```
+Current namespace roots:
 
-Register a logger in your package's `[InitializeOnLoad]` static class:
+- `wk-vrc-qol` -> `WhyKnot.AvatarQol.Internal`
+- `wk-vrcfury-qol` -> `UmeVrcfQol.Internal`
+
+After syncing, compile the downstream package in Unity and commit the downstream `Editor/Internal/` changes with the wk-core change that required them.
+
+## Using the helpers
+
+Inside this repo the source namespace is `WhyKnot.Core.*`. After sync, the script rewrites that namespace to the downstream package's internal namespace.
+
+Register a logger in the consuming package's `[InitializeOnLoad]` static class:
 
 ```csharp
 using UnityEditor;

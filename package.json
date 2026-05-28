@@ -3,7 +3,7 @@
   "displayName": "WK Core",
   "version": "1.2.0",
   "unity": "2022.3",
-  "description": "Source of truth for the shared Editor-only utilities bundled into dev.whyknot.avatar-qol and dev.whyknot.vrcfury-qol via scripts/sync-to-downstream.ps1. Not distributed via VPM -- the helpers ship inside each downstream's Editor/Internal/ tree to avoid version-coupling.",
+  "description": "Source of truth for the shared Editor-only utilities bundled into wk-vrc-qol and wk-vrcfury-qol via scripts/sync-to-downstream.ps1. Not distributed via VPM -- the helpers ship inside each downstream's Editor/Internal/ tree to avoid version-coupling.",
   "author": {
     "name": "WhyKnot",
     "url": "https://whyknot.dev"
