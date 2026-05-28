@@ -114,20 +114,6 @@ namespace WhyKnot.Core.Tests {
             Assert.AreEqual(260f, WkStyles.CappedListHeight(1000, minHeight: 80f, maxHeight: 260f));
         }
 
-        [Test]
-        public void AnimatedAccentColor_ReturnsFiniteColors() {
-            AssertFiniteColor(WkStyles.AnimatedAccentColor(0));
-            AssertFiniteColor(WkStyles.AnimatedAccentColor(1.25));
-            AssertFiniteColor(WkStyles.AnimatedAccentColor(10));
-        }
-
-        [Test]
-        public void RepaintAnimatedChrome_AllowsNullWindow() {
-            double next = 0;
-            WkStyles.RepaintAnimatedChrome(null, ref next);
-            Assert.AreEqual(0, next);
-        }
-
         private static void AssertFiniteColor(Color c) {
             Assert.IsFalse(float.IsNaN(c.r) || float.IsNaN(c.g) || float.IsNaN(c.b) || float.IsNaN(c.a),
                 $"Color contains NaN component: {c}");

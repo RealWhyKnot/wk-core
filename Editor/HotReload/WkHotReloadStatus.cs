@@ -63,7 +63,6 @@ namespace WhyKnot.Core.HotReload {
         private void OnGUI() {
             using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true))) {
                 EditorGUILayout.LabelField("Hot Reload Status", EditorStyles.boldLabel);
-                DrawAnimatedAccentLine();
 
                 using (var s = new EditorGUILayout.ScrollViewScope(
                         _bodyScroll, false, false,
@@ -136,29 +135,13 @@ namespace WhyKnot.Core.HotReload {
                 padding = new RectOffset(4, 4, 2, 2),
             };
 
-        private static Color AnimatedAccentColor() {
-            var pulse = 0.5f + 0.5f * Mathf.Sin((float)EditorApplication.timeSinceStartup * 2.4f);
-            return Color.Lerp(new Color(0.23f, 0.56f, 0.78f), new Color(0.42f, 0.82f, 1f), pulse);
-        }
-
-        private static void DrawAnimatedAccentLine() {
-            var rect = EditorGUILayout.GetControlRect(false, 2f, GUILayout.ExpandWidth(true));
-            EditorGUI.DrawRect(rect, new Color(0.23f, 0.56f, 0.78f, 0.35f));
-            if (rect.width <= 1f) return;
-
-            var cycle = Mathf.Repeat((float)EditorApplication.timeSinceStartup, 2.8f) / 2.8f;
-            var width = Mathf.Clamp(rect.width * 0.28f, 48f, 180f);
-            var x = Mathf.Lerp(rect.x - width, rect.xMax, cycle);
-            EditorGUI.DrawRect(new Rect(x, rect.y, width, rect.height), AnimatedAccentColor());
-        }
-
         private static void DrawDivider() {
             var rect = EditorGUILayout.GetControlRect(false, 1f);
             EditorGUI.DrawRect(rect, new Color(0f, 0f, 0f, 0.25f));
         }
 
         private static void DrawBrandFooter() {
-            var heartColor = ColorUtility.ToHtmlStringRGB(AnimatedAccentColor());
+            var heartColor = ColorUtility.ToHtmlStringRGB(new Color(0.42f, 0.82f, 1f));
             var text = "Made with <color=#" + heartColor + ">\u2665</color> by WhyKnot";
             using (new EditorGUILayout.HorizontalScope(GUILayout.ExpandWidth(true), GUILayout.MinHeight(22))) {
                 if (BrandLogoTexture != null) {
