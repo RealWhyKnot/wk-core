@@ -23,7 +23,7 @@ namespace WhyKnot.Core.HotReload {
         // for the same menu path when both downstreams are installed.
         public static void Open() {
             var w = GetWindow<WkHotReloadStatus>(false, "Hot Reload Status");
-            w.titleContent = new GUIContent("Hot Reload Status", BrandLogoTexture, "Hot Reload Status");
+            w.titleContent = new GUIContent("Hot Reload Status", "Hot Reload Status");
             w.minSize = new Vector2(460, 360);
             w.Show();
         }
@@ -33,6 +33,7 @@ namespace WhyKnot.Core.HotReload {
         private static GUIStyle _brandFooterStyle;
         private static Texture2D _brandLogo;
         private static bool _brandLogoLoaded;
+        private string _autoSizeSignature;
 
         private static readonly string[] BrandLogoAssetPaths = {
             "Packages/dev.whyknot.core/Editor/Assets/WhyKnotLogo.png",
@@ -78,6 +79,7 @@ namespace WhyKnot.Core.HotReload {
                 DrawFooter();
                 DrawBrandFooter();
             }
+            AutoSizeWindow();
         }
 
         private void DrawSummary() {
@@ -208,6 +210,37 @@ namespace WhyKnot.Core.HotReload {
             }
 
             return null;
+        }
+
+        private void AutoSizeWindow() {
+            var events = EditorHotReload.RecentEvents;
+            var count = events != null ? events.Count : 0;
+            var signature = $"{count}|{EditorHotReload.RefreshCount}|{EditorHotReload.LastCompileResult}|{EditorHotReload.LogFilePath}";
+            if (_autoSizeSignature == signature) return;
+            _autoSizeSignature = signature;
+
+            var min = new Vector2(460f, 360f);
+            var preferred = new Vector2(620f, Mathf.Clamp(280f + CappedListHeight(count), min.y, 620f));
+            var target = ClampAutoWindowSize(preferred, min, new Vector2(760f, 680f));
+            minSize = min;
+            EditorApplication.delayCall += () => {
+                if (this == null) return;
+                minSize = min;
+                var pos = position;
+                if (pos.width <= 1f || pos.height <= 1f) return;
+                if (Mathf.Abs(pos.width - target.x) < 1f && Mathf.Abs(pos.height - target.y) < 1f) return;
+                position = new Rect(pos.x, pos.y, target.x, target.y);
+            };
+        }
+
+        private static float CappedListHeight(int itemCount, float rowHeight = 18f, float minHeight = 120f, float maxHeight = 220f) {
+            return Mathf.Clamp(Mathf.Max(0, itemCount) * rowHeight + 12f, minHeight, maxHeight);
+        }
+
+        private static Vector2 ClampAutoWindowSize(Vector2 preferred, Vector2 min, Vector2 max) {
+            return new Vector2(
+                Mathf.Clamp(preferred.x, min.x, Mathf.Max(min.x, max.x)),
+                Mathf.Clamp(preferred.y, min.y, Mathf.Max(min.y, max.y)));
         }
     }
 }

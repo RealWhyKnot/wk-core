@@ -95,6 +95,23 @@ namespace WhyKnot.Core.Tests {
             var content = WkStyles.TitleContent("Sample Tool", "Sample tooltip");
             Assert.AreEqual("Sample Tool", content.text);
             Assert.AreEqual("Sample tooltip", content.tooltip);
+            Assert.IsNull(content.image, "Only the in-window footer should render the WhyKnot logo.");
+        }
+
+        [Test]
+        public void AutoWindowSize_ClampsToMinAndMax() {
+            var min = new Vector2(400f, 300f);
+            var max = new Vector2(700f, 600f);
+
+            Assert.AreEqual(min, WkStyles.ClampAutoWindowSize(new Vector2(100f, 100f), min, max));
+            Assert.AreEqual(max, WkStyles.ClampAutoWindowSize(new Vector2(900f, 900f), min, max));
+            Assert.AreEqual(new Vector2(520f, 480f), WkStyles.ClampAutoWindowSize(new Vector2(520f, 480f), min, max));
+        }
+
+        [Test]
+        public void CappedListHeight_PreventsUnboundedGrowth() {
+            Assert.AreEqual(80f, WkStyles.CappedListHeight(0, minHeight: 80f, maxHeight: 260f));
+            Assert.AreEqual(260f, WkStyles.CappedListHeight(1000, minHeight: 80f, maxHeight: 260f));
         }
 
         [Test]
